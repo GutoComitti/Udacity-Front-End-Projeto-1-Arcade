@@ -23,9 +23,6 @@ let Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        //TODO: Ver se o melhor é definir a variável aqui e modificar quando ganhar, checando na função main e rodando função win ou lose
-        // playerWIn = false,
-        // playerLose = false,
         lastTime;
 
     canvas.width = 505;
@@ -67,21 +64,20 @@ let Engine = (function(global) {
      * game loop.
      */
     function init() {
-        reset();
         lastTime = Date.now();
         App.instantiateAll();
         main();
     }
 
-    //Function that will run once the player reaches the water
+    //Função da vitória => irá rodar assim que o jogador atingir a água, 
+    //avisando ao jogador que ele ganhou e reiniciando o jogo
     var winGame = function(){
         alert("You won!");
         init();
-        //tentei fazer começar o jogo novamente após alguns segundos, mas o jogo continuava 
-        //e após alguns segundos reiniciava => setTimeout(function(){init()},4000);
     };
 
-    //Function that will run once there's collision between the player and an enemy
+    //Função da derrota => irá rodar caso o haja colisão entre o jogador e algum inimigo,
+    //reiniciando o jogo sem nenhum aviso
     var loseGame = function(){
         init();
     }
@@ -99,7 +95,6 @@ let Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        //checkCollisions();
     }
 
     /* This is called by the update function and loops through all of the
@@ -110,12 +105,13 @@ let Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-        //Inverti a ordem pois a checagem da colisão está na função inimigo, buscando evitar bugs
-        //tais como o jogador ir para a posição do inimigo, mas a posição ser checada antes de atualizar a posição do jogador
-        player.update();
         allEnemies.forEach(function(enemy) {
             enemy.update(dt, player);
         });
+        //O próprio handleInput já faz todo o update do jogador, não precisando desta
+        //função. Como o jogador move-se apenas com o input não pareceu necessário
+        //uma função apenas para update (ao meu ver apenas geraria mais complexidade).
+        //player.update();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -172,17 +168,7 @@ let Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
-
         player.render();
-    }
-
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
-     */
-    function reset() {
-        allEnemies = [];
-        // noop
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -194,9 +180,7 @@ let Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png',
-        'images/You Won.png',
-        'images/You Lost.png'
+        'images/char-boy.png'
     ]);
     Resources.onReady(init);
 
